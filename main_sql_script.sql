@@ -15,9 +15,9 @@ create table equipment_table
   eq_id      char(10) charset utf8 not null
     primary key,
   eq_name    char(10) charset utf8 not null,
-  eq_cost    smallint(6) default 1 not null comment '0 for "free"',
-  eq_sell    smallint(6)           not null comment '0 for "free"',
-  eq_type    tinyint               not null comment '0-not set,1-body,2-weapon,3-necklace',
+  eq_cost    smallint(6) default 0 not null comment '0 for "free"',
+  eq_sell    smallint(6) default 0 not null comment '0 for "free"',
+  eq_type    tinyint     default 0 not null comment '0-not set,1-body,2-weapon,3-necklace',
   eq_hp_add  smallint(6) default 0 not null,
   eq_mp_add  smallint(6) default 0 not null,
   eq_ack_add smallint(6) default 0 not null,
@@ -28,7 +28,7 @@ create table enemy_drop_equip_table
 (
   enemy_id        char(10) charset utf8 not null,
   equip_id        char(10) charset utf8 not null,
-  ede_probability double                not null,
+  ede_probability double default 0      not null,
   primary key (enemy_id, equip_id),
   constraint enemy_drop_equip_table_enemy_talbe_enemy_id_fk
     foreign key (enemy_id) references enemy_talbe (enemy_id)
@@ -71,8 +71,8 @@ create table union_table
   union_id        char(10) charset utf8              not null
     primary key,
   union_name      char(10) charset utf8              not null,
-  union_level     tinyint                            not null,
-  union_exp       int                                not null,
+  union_level     tinyint  default 1                 not null,
+  union_exp       int      default 0                 not null,
   union_join_time datetime default CURRENT_TIMESTAMP not null,
   union_nums      int      default 1                 not null
 )
@@ -127,3 +127,5 @@ create table union_user
     foreign key (user_id) references user_table (user_id)
       on update cascade on delete cascade
 );
+
+
