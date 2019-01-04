@@ -7,7 +7,8 @@ create table enemy_talbe
   enemy_mp   smallint(6) default 1 not null,
   enemy_ack  smallint(6) default 1 not null,
   enemy_def  smallint(6) default 1 not null,
-  enemy_exp  int         default 0 not null
+  enemy_exp  int         default 0 not null,
+  enemy_coin int         default 0 not null
 );
 
 create table equipment_table
@@ -66,18 +67,6 @@ create table enemy_drop_tool_table
       on delete cascade
 );
 
-create table union_table
-(
-  union_id        char(10) charset utf8              not null
-    primary key,
-  union_name      char(10) charset utf8              not null,
-  union_level     tinyint  default 1                 not null,
-  union_exp       int      default 0                 not null,
-  union_join_time datetime default CURRENT_TIMESTAMP not null,
-  union_nums      int      default 1                 not null
-)
-  comment '工会表';
-
 create table user_table
 (
   user_id       char(10) charset utf8 not null
@@ -114,6 +103,24 @@ create table status_table
     foreign key (user_id) references user_table (user_id)
       on update cascade on delete cascade
 );
+
+create table union_table
+(
+  union_id        char(10) charset utf8              not null
+    primary key,
+  union_name      char(10) charset utf8              not null,
+  union_level     tinyint  default 1                 not null,
+  union_exp       int      default 0                 not null,
+  union_join_time datetime default CURRENT_TIMESTAMP not null,
+  union_nums      int      default 1                 not null,
+  union_chairman  char(10) charset utf8              not null,
+  union_vice      char(10) charset utf8              not null,
+  constraint union_table_user_table_user_id_fk
+    foreign key (union_chairman) references user_table (user_id),
+  constraint union_table_user_table_user_id_fk_2
+    foreign key (union_vice) references user_table (user_id)
+)
+  comment '工会表';
 
 create table union_user
 (
