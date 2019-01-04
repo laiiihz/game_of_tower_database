@@ -82,7 +82,7 @@ create table user_table
 (
   user_id       char(10) charset utf8 not null
     primary key,
-  user_nickname char(15) charset utf8 not null,
+  user_nickname char(25) charset utf8 not null,
   user_sex      tinyint(1)            not null comment '0 for "女" ,1 for "男"',
   user_level    tinyint    default 1  not null,
   user_exp      int        default 0  not null,
@@ -125,7 +125,7 @@ create table union_user
       on delete cascade,
   constraint union_user_user_table_user_id_fk
     foreign key (user_id) references user_table (user_id)
-      on update cascade on delete cascade
+      on delete cascade
 );
 
 
