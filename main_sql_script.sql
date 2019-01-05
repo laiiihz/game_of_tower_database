@@ -1,14 +1,15 @@
 create table enemy_talbe
 (
-  enemy_id   char(10) charset utf8 not null
+  enemy_id         char(10) charset utf8 not null
     primary key,
-  enemy_name char(10) charset utf8 not null,
-  enemy_hp   smallint(6) default 1 not null,
-  enemy_mp   smallint(6) default 1 not null,
-  enemy_ack  smallint(6) default 1 not null,
-  enemy_def  smallint(6) default 1 not null,
-  enemy_exp  int         default 0 not null,
-  enemy_coin int         default 0 not null
+  enemy_name       char(10) charset utf8 not null,
+  enemy_hp         smallint(6) default 1 not null,
+  enemy_mp         smallint(6) default 1 not null,
+  enemy_ack        smallint(6) default 1 not null,
+  enemy_def        smallint(6) default 1 not null,
+  enemy_exp        int         default 0 not null,
+  enemy_coin       int         default 0 not null,
+  enemy_real_level int         default 1 not null
 );
 
 create table equipment_table
@@ -91,17 +92,54 @@ create table currency_table
 )
   comment '货币';
 
+create table pack_equip_table
+(
+  user_id  char(10) charset utf8 not null,
+  equip_id char(10) charset utf8 not null,
+  pack_num int default 1         not null,
+  primary key (user_id, equip_id),
+  constraint pack_equip_table_equipment_table_eq_id_fk
+    foreign key (equip_id) references equipment_table (eq_id)
+      on delete cascade,
+  constraint pack_equip_table_user_table_user_id_fk
+    foreign key (user_id) references user_table (user_id)
+      on delete cascade
+);
+
+create table pack_tool_table
+(
+  user_id  char(10) charset utf8 not null,
+  tool_id  char(10) charset utf8 not null,
+  pack_num int default 1         not null,
+  primary key (user_id, tool_id),
+  constraint pack_tool_table_tools_table_tool_id_fk
+    foreign key (tool_id) references tools_table (tool_id)
+      on delete cascade,
+  constraint pack_tool_table_user_table_user_id_fk
+    foreign key (user_id) references user_table (user_id)
+      on delete cascade
+);
+
 create table status_table
 (
-  user_id    char(10) charset utf8 not null
+  user_id               char(10) charset utf8 not null
     primary key,
-  status_hp  smallint(6) default 1 not null,
-  status_mp  smallint(6) default 1 null,
-  status_ack smallint(6) default 1 not null,
-  status_def smallint(6) default 1 not null,
+  status_hp             smallint(6) default 1 not null,
+  status_mp             smallint(6) default 1 null,
+  status_ack            smallint(6) default 1 not null,
+  status_def            smallint(6) default 1 not null,
+  status_equip_hand     char(10) charset utf8 null,
+  status_equip_body     char(10) charset utf8 null,
+  status_equip_necklace char(10) charset utf8 null,
   constraint equip_table_user_table_user_id_fk
     foreign key (user_id) references user_table (user_id)
-      on update cascade on delete cascade
+      on update cascade on delete cascade,
+  constraint status_table_equipment_table_eq_id_fk
+    foreign key (status_equip_hand) references equipment_table (eq_id),
+  constraint status_table_equipment_table_eq_id_fk_2
+    foreign key (status_equip_body) references equipment_table (eq_id),
+  constraint status_table_equipment_table_eq_id_fk_3
+    foreign key (status_equip_necklace) references equipment_table (eq_id)
 );
 
 create table union_table
@@ -134,5 +172,32 @@ create table union_user
     foreign key (user_id) references user_table (user_id)
       on delete cascade
 );
+
+create procedure pl(IN inid char(10), OUT hp int)
+begin
+
+  select adds into hp
+  from (select user_table.user_id,sum + user_id * 1000 as adds
+        from (select myid,myhp1 + myhp2 + myhp3 as sum
+              from (select all_temp.myid,all_temp.myhp1,all_temp.myhp2,hp3 as myhp3
+                    from (select tem.user_id as myid,hp1 as myhp1,hp2 as myhp2
+                          from (select user_id,eq_hp_add as hp1
+                                from status_table,
+                                     equipment_table
+                                where status_equip_hand = eq_id) as tem,
+                               (select user_id,eq_hp_add as hp2
+                                from status_table,
+                                     equipment_table
+                                where status_equip_body = eq_id) as tem2
+                          where tem.user_id = tem2.user_id) as all_temp,
+                         (select user_id,eq_hp_add as hp3
+                          from status_table,
+                               equipment_table
+                          where status_equip_necklace = eq_id) as tem3
+                    where myid = user_id) as result) as all_add,
+             user_table
+        where all_add.myid = user_table.user_id) as fff
+  where user_id = inid;
+end;
 
 
