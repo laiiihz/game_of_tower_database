@@ -135,7 +135,7 @@ create table status_table
 	status_equip_necklace char(10) charset utf8 null,
 	constraint equip_table_user_table_user_id_fk
 		foreign key (user_id) references user_table (user_id)
-			on update cascade on delete cascade,
+			on delete cascade,
 	constraint status_table_equipment_table_eq_id_fk
 		foreign key (status_equip_hand) references equipment_table (eq_id),
 	constraint status_table_equipment_table_eq_id_fk_2
@@ -174,6 +174,15 @@ create table union_user
 		foreign key (user_id) references user_table (user_id)
 			on delete cascade
 );
+
+create trigger user_add_new
+after INSERT on user_table
+for each row
+begin
+    declare new_id nchar(10) default 0;
+    set new_id=NEW.user_id;
+    insert into status_table values (new_id,100,100,100,100,null,null,null);
+  end;
 
 create view user_with_status as select `game_of_tower`.`user_table`.`user_id`       AS `user_id`,
        `game_of_tower`.`user_table`.`user_nickname` AS `user_nickname`,
