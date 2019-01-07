@@ -175,6 +175,23 @@ create table union_user
 			on delete cascade
 );
 
+create trigger level_up_mod
+after UPDATE on user_table
+for each row
+begin
+    declare level_old tinyint(4);
+    declare level_new tinyint(4);
+    declare myid      nchar(10);
+    declare level_result tinyint(4);
+    set myid=NEW.user_id;
+    set level_old=OLD.user_level;
+    set level_new=NEW.user_level;
+    set level_result=level_new-level_old;
+    update status_table
+      set status_hp=(status_hp+level_result*100)
+    where user_id=myid;
+  end;
+
 create trigger user_add_new
 after INSERT on user_table
 for each row
