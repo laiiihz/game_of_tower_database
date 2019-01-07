@@ -167,6 +167,7 @@ create table union_user
 	user_id char(10) charset utf8 not null
 		primary key,
 	union_id char(10) charset utf8 not null,
+	user_type tinyint(2) default 1 not null comment '1-普通,2-精英,3-元老',
 	constraint union_user_union_table_union_id_fk
 		foreign key (union_id) references union_table (union_id)
 			on delete cascade,
