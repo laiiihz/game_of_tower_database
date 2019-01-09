@@ -1,6 +1,6 @@
 create schema game_of_tower collate latin1_swedish_ci;
 
-create table enemy_talbe
+create table enemy_table
 (
 	enemy_id char(10) charset utf8 not null
 		primary key,
@@ -35,7 +35,7 @@ create table enemy_drop_equip_table
 	ede_probability double default 0 not null,
 	primary key (enemy_id, equip_id),
 	constraint enemy_drop_equip_table_enemy_talbe_enemy_id_fk
-		foreign key (enemy_id) references enemy_talbe (enemy_id)
+		foreign key (enemy_id) references enemy_table (enemy_id)
 			on delete cascade,
 	constraint enemy_drop_equip_table_equipment_table_eq_id_fk
 		foreign key (equip_id) references equipment_table (eq_id)
@@ -63,7 +63,7 @@ create table enemy_drop_tool_table
 	drop_probability double default 0 not null,
 	primary key (enemy_id, drop_probability),
 	constraint enemy_drop_tool_table_enemy_talbe_enemy_id_fk
-		foreign key (enemy_id) references enemy_talbe (enemy_id)
+		foreign key (enemy_id) references enemy_table (enemy_id)
 			on delete cascade,
 	constraint enemy_drop_tool_table_tools_table_tool_id_fk
 		foreign key (tool_id) references tools_table (tool_id)
@@ -202,6 +202,39 @@ begin
     insert into status_table values (new_id,100,100,100,100,null,null,null);
   end;
 
+create view search_q1 as select `game_of_tower`.`user_table`.`user_id`      AS `user_id`,
+       `game_of_tower`.`user_table`.`user_level`   AS `user_level`,
+       `game_of_tower`.`user_table`.`user_sex`     AS `user_sex`,
+       `game_of_tower`.`status_table`.`status_def` AS `status_def`
+from `game_of_tower`.`user_table`
+       join `game_of_tower`.`status_table`
+where ((`game_of_tower`.`user_table`.`user_sex` = 0) and
+       (`game_of_tower`.`user_table`.`user_id` = `game_of_tower`.`status_table`.`user_id`) and
+       (`game_of_tower`.`user_table`.`user_level` >= 80) and (`game_of_tower`.`status_table`.`status_def` >= 200));
+
+create view search_q3 as select `game_of_tower`.`union_table`.`union_id`        AS `union_id`,
+       `game_of_tower`.`union_table`.`union_name`      AS `union_name`,
+       `game_of_tower`.`union_table`.`union_level`     AS `union_level`,
+       `game_of_tower`.`union_table`.`union_exp`       AS `union_exp`,
+       `game_of_tower`.`union_table`.`union_join_time` AS `union_join_time`,
+       `game_of_tower`.`union_table`.`union_nums`      AS `union_nums`,
+       `game_of_tower`.`union_table`.`union_chairman`  AS `union_chairman`,
+       `game_of_tower`.`union_table`.`union_vice`      AS `union_vice`
+from `game_of_tower`.`union_table`
+order by `game_of_tower`.`union_table`.`union_nums` desc
+limit 0,5;
+
+create view search_q4 as select `game_of_tower`.`union_table`.`union_chairman`                                                    AS `union_chairman`,
+       `game_of_tower`.`status_table`.`status_ack`                                                       AS `status_ack`,
+       `game_of_tower`.`user_table`.`user_level`                                                         AS `user_level`,
+       (`game_of_tower`.`status_table`.`status_ack` - (`game_of_tower`.`user_table`.`user_level` * 100)) AS `ack_add`
+from `game_of_tower`.`union_table`
+       join `game_of_tower`.`status_table`
+       join `game_of_tower`.`user_table`
+where ((`game_of_tower`.`union_table`.`union_chairman` = `game_of_tower`.`status_table`.`user_id`) and
+       (`game_of_tower`.`union_table`.`union_chairman` = `game_of_tower`.`user_table`.`user_id`) and
+       ((`game_of_tower`.`status_table`.`status_ack` - (`game_of_tower`.`user_table`.`user_level` * 100)) > 90));
+
 create view user_with_status as select `game_of_tower`.`user_table`.`user_id`       AS `user_id`,
        `game_of_tower`.`user_table`.`user_nickname` AS `user_nickname`,
        `game_of_tower`.`user_table`.`user_sex`      AS `user_sex`,
@@ -213,5 +246,19 @@ create view user_with_status as select `game_of_tower`.`user_table`.`user_id`   
 from `game_of_tower`.`user_table`
        join `game_of_tower`.`status_table`
 where (`game_of_tower`.`user_table`.`user_id` = `game_of_tower`.`status_table`.`user_id`);
+
+create procedure change_state(IN changehp int, IN changemp int, IN myid char(10))
+begin
+  UPDATE enemy_table
+    SET enemy_hp=enemy_hp-changehp,enemy_mp=enemy_mp-changemp
+    where enemy_id=myid;
+end;
+
+create procedure update_q2()
+begin
+  update enemy_talbe
+set enemy_coin=enemy_coin*2 ,enemy_exp=enemy_exp*2
+where enemy_real_level<=30;
+end;
 
 
